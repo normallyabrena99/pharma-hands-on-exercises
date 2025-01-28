@@ -21,7 +21,7 @@ In this document you'll see code chunks (which typically have a light grey backg
 For these projects we are using anonymized CDISC datasets, which can be found here: <https://github.com/phuse-org/phuse-scripts/tree/master/data/adam/cdisc>
 
 ## R objects and functions
-
+s
 Within R we typically use objects of different types e.g. data, vectors, lists etc. and then we apply functions. Functions have the construct `<function_name>(<argument1>=   , <argument2> = )`. When you use functions, you don't ***have*** to use the argument name and instead you can implicitly refer to the arguments by position e.g. `myFunction(foo, 1, "bar")` passes in the R object `foo` as the value for argument 1; argument 2 takes the value `1` and argument 3 takes the character value `"bar"`. While you're learning R we recommend that you explicitly name and use the arguments in functions, except where functions only have one argument. You can use the tab-completion in the RStudio IDE to help complete function call arguments. To see the arguments of a function type `?<functionName>` in the Console.
 
 ## Start the mini project

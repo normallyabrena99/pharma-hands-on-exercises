@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 3 - Generating grouped summary statistics"
-author: "Mike K Smith"
-date: "02/14/2023"
+author: "Norma Alejandra Abrena"
+date: "02/20/2025"
 output: html_document
 ---
 
@@ -59,7 +59,7 @@ library(rio)
 2.   Read in the CDISC adsl data from the GitHub location (`https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt`) and assign this to an object in R using the assignment operator `<-`. Make sure that the URL location is a character string by enclosing it in `" "`. The `rio` package has a function called `import` that reads data into R and infers the data type from the file name. The first argument of that function is `file`. Paste the file path / URL above after the `file=` argument in the code below, then run the chunk using the green arrow.
 
 ```{r read_adsl}
-adsl <- import( file = ""  )
+adsl <- import( file = "https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt"  )
 adsl
 ```
 
@@ -67,7 +67,7 @@ Next filter the adsl dataset where the EFFFL variable has the value "Y" (as we d
 
 ```{r create_adsl_eff}
 adsl_eff <- adsl %>%
-  filter(  ) %>%
+  filter( EFFFL=="Y" ) %>%
   mutate(SEX = recode(SEX, "M" = "Male", "F" = "Female")) 
 ```
 
@@ -85,7 +85,7 @@ The {dplyr} package has a function called `summarize()` that will calculate vari
 
 ```{r}
 adsl_eff %>%
-  group_by(  ) %>% 
+  group_by( TRT01AN, TRT01A, SEX ) %>% 
   summarize(mean =(mean(AGE)))
 ```
 
@@ -95,8 +95,8 @@ Notice that there are 5 decimal places outputted in the mean values. We do not o
 adsl_eff %>%
   group_by( TRT01A, TRT01AN, SEX ) %>%
   summarize(mean = (mean( AGE ) %>% 
-                      round(digits =  ) %>%
-                      format(nsmall =  ))
+                      round(digits = 1 ) %>%
+                      format(nsmall = 1 ))
   )
 ```
 
@@ -107,11 +107,11 @@ Using the above information, finish the code below by creating a data frame name
 ```{r}
 age_stat<- adsl_eff %>%
   group_by(TRT01AN,TRT01A,SEX) %>%
-  summarize(mean = (mean( ) %>% round(digits = 1) %>% format(nsmall=1))  ,
-            sd = (sd( ) %>% round(digits = 1) %>% format(nsmall = 1)), 
-            med = median( )  ,              
-            min = min( ), 
-            max = max( ),
+  summarize(mean = (mean( AGE ) %>% round(digits = 1) %>% format(nsmall=1))  ,
+            sd = (sd(AGE ) %>% round(digits = 1) %>% format(nsmall = 1)), 
+            med = median( AGE)  ,              
+            min = min( AGE), 
+            max = max(AGE ),
             n = n())
 
 age_stat
@@ -204,6 +204,58 @@ To check that your code is reproducible, you will want to use the "knit" button 
 
 Save the .RMD file on your desktop and click on the "Knit" button at the top of the file to render an HTML version of this document.
 
+```{r weight_stat}
+weight_stat <-  adsl_eff %>%
+  group_by(TRT01AN,TRT01A,SEX) %>%
+  summarize(mean = (mean( WEIGHTBL ) %>% round(digits = 1) %>% format(nsmall=1))  ,
+            sd = (sd(WEIGHTBL ) %>% round(digits = 1) %>% format(nsmall = 1)), 
+            med = median( WEIGHTBL)  ,              
+            min = min( WEIGHTBL), 
+            max = max(WEIGHTBL ),
+            n = n()) %>% 
+  mutate(range_minmax=paste("(",min, ",", max, ")")) %>% 
+  ungroup() %>% 
+  select("TRT01A","SEX", "n", "mean", "med", "sd", "range_minmax") %>% 
+  mutate(across(where(is.numeric), .fns = as.character)) %>%
+  pivot_longer(-c("TRT01A","SEX"), names_to ="category", values_to = "values" ) %>% 
+  pivot_wider(names_from = c(TRT01A, SEX), values_from = values) %>%
+  mutate(category = case_when(category == "n" ~ "N",
+                              category == "med" ~ "Median", 
+                              category == "mean" ~ "Mean", 
+                              category == "sd" ~ "Std Dev", 
+                              category == "range_minmax" ~ "Range(min,max)"))
+
+weight_stat
+
+```
+
+```{r height_stat}
+height_stat <-  adsl_eff %>%
+  group_by(TRT01AN,TRT01A,SEX) %>%
+  summarize(mean = (mean( HEIGHTBL ) %>% round(digits = 1) %>% format(nsmall=1))  ,
+            sd = (sd(HEIGHTBL ) %>% round(digits = 1) %>% format(nsmall = 1)), 
+            med = median( HEIGHTBL)  ,              
+            min = min( HEIGHTBL), 
+            max = max(HEIGHTBL ),
+            n = n()) %>% 
+  mutate(range_minmax=paste("(",min, ",", max, ")")) %>% 
+  ungroup() %>% 
+  select("TRT01A","SEX", "n", "mean", "med", "sd", "range_minmax") %>% 
+  mutate(across(where(is.numeric), .fns = as.character)) %>%
+  pivot_longer(-c("TRT01A","SEX"), names_to ="category", values_to = "values" ) %>% 
+  pivot_wider(names_from = c(TRT01A, SEX), values_from = values) %>%
+  mutate(category = case_when(category == "n" ~ "N",
+                              category == "med" ~ "Median", 
+                              category == "mean" ~ "Mean", 
+                              category == "sd" ~ "Std Dev", 
+                              category == "range_minmax" ~ "Range(min,max)"))
+
+height_stat
+
+```
+
+
+
 ### Extra credit / Top tip:
 
 If you need to copy and paste code 3 times or more it's time to write a function. Functions in R are a bit like Macros in SAS.
@@ -235,7 +287,7 @@ varSummary <- function(adsl_eff, TRT01AN, TRT01A, SEX) {
               min = min( ), 
               max = max( ),
               n = n())
-}
+} 
 ```
 
 using the "Extract function" in RStudio IDE's "Code" menu. You can then tidy this code to change the function arguments. You then want to abstract the code so that the user running the code has the ability to change the things that they need to change. This abstraction means that writing the code is a little more complex within the tidyverse - you need to refer to the variable within a dataset, and stop R from trying to find that variable as an object in your environment (top right tab in RStudio IDE).

@@ -59,7 +59,7 @@ library(rio)
 2.   Read in the CDISC adsl data from the GitHub location (`https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt`) and assign this to an object in R using the assignment operator `<-`. Make sure that the URL location is a character string by enclosing it in `" "`. The `rio` package has a function called `import` that reads data into R and infers the data type from the file name. The first argument of that function is `file`. Paste the file path / URL above after the `file=` argument in the code below, then run the chunk using the green arrow.
 
 ```{r read_adsl}
-adsl <- import( file = "https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt"  )
+adsl <- import(file = "https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt")
 adsl
 ```
 

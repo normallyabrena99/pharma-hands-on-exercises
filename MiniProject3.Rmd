@@ -265,11 +265,11 @@ You can quickly convert from code like this:
 ```{r}
 age_stat<- adsl_eff %>%
   group_by(TRT01AN,TRT01A,SEX) %>%
-  summarize(mean = mean( ) %>% round(digits = 1) %>% format(nsmall=1)  ,
-            sd = sd( ) %>% round(digits = 1) %>% format(nsmall = 1), 
-            med = median( )  ,              
-            min = min( ), 
-            max = max( ),
+  summarize(mean = mean( AGE) %>% round(digits = 1) %>% format(nsmall=1)  ,
+            sd = sd( AGE) %>% round(digits = 1) %>% format(nsmall = 1), 
+            med = median(AGE )  ,              
+            min = min(AGE ), 
+            max = max( AGE),
             n = n())
 
 age_stat
@@ -279,7 +279,7 @@ To a function like this:
 
 ```{r, eval = FALSE}
 varSummary <- function(adsl_eff, TRT01AN, TRT01A, SEX) {
-  adsl_saf %>%
+  adsl_eff %>%
     group_by(TRT01AN,TRT01A,SEX) %>%
     summarize(mean = mean( ) %>% round(digits = 1) %>% format(nsmall=1)  ,
               sd = sd( ) %>% round(digits = 1) %>% format(nsmall = 1), 
@@ -306,8 +306,8 @@ varSummary <- function(.data, variable) {
               n = n())
 }
 
-adsl_saf %>%
-  varSummary(AGE)
+# adsl_eff %>%
+#   varSummary(AGE)
 ```
 
 The problem here is that R is looking for an object called AGE, which doesn't exist in the current Environment. Instead we need to tell R that the "AGE" argument that we pass should be interpreted within the scope of the data, rather than looking in the Environment. The secret is to enclose or "embrace" the variable in double quotes within the function. It's a bit like using a Macro variable in SAS.
@@ -324,6 +324,6 @@ varSummary <- function(.data = NULL, variable = NULL) {
               n = n())
 }
 
-adsl_saf %>%
+adsl_eff %>%
   varSummary(AGE)
 ```

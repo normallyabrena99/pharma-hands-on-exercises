@@ -338,7 +338,7 @@ BigN <- adsl_eff %>%
   count(name = "N")
 ```
 
-```{r small_n}
+```{r small_n_challenge}
 small_n <- adsl_eff %>%
   group_by(TRT01AN, TRT01A, AGEGR1N, AGEGR1, SEX) %>%
   count(name = "n")

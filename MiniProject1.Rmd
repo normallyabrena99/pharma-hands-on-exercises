@@ -33,6 +33,7 @@ library(tidyverse)
 library(rio)
 library(skimr)
 library(htmlTable)
+
 ```
 
 2.  There are numerous ways and packages to read in the data in R. For instance, the `haven` package has a function called read_xpt() that allows you to make an R data object converting from a \*.xpt file. The `readr` package provides a fast and friendly way to read rectangular data from delimited files, such as comma-separated values (CSV) and tab-separated values (TSV). The `readxl` package makes it easy to get data out of Excel and into R. The functions that allow you to read in the data regardless of the package tend to have the first argument to be the data path, however it is always important to read the documentation before using a new package or a function.

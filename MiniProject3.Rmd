@@ -60,6 +60,7 @@ library(rio)
 
 ```{r read_adsl}
 adsl <- import(file = "https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt")
+
 adsl
 ```
 

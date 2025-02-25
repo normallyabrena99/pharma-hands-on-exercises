@@ -336,26 +336,28 @@ Repeat the steps above, but add an additional grouping variable to the calculati
 BigN <- adsl_eff %>%
   group_by(TRT01AN, TRT01A, AGEGR1N, AGEGR1) %>%
   count(name = "N")
+BigN
 ```
 
 ```{r small_n_challenge}
 small_n <- adsl_eff %>%
   group_by(TRT01AN, TRT01A, AGEGR1N, AGEGR1, SEX) %>%
   count(name = "n")
+small_n
 ```
 
 ```{r challenge1}
 # Paste commands above after the "<-" assignment, one per line
 adsl_age_cnt <- small_n %>%
                 left_join(BigN) %>%
-                mutate(perc = round(n/N*100, digits=1)) %>%
+                mutate(perc = round(n/N*100, digits=1)) %>% 
                 mutate(perc_char = format(perc, nsmall=1)) %>%
                 mutate(npct = paste(n, "(", perc_char, ")" ) ) %>% 
-                mutate(SEX = recode(SEX, "M" = "Male", "F" = "Female")) %>% 
+                mutate(SEX = recode(SEX, "M" = "Male", "F" = "Female")) %>%
                 ungroup() %>%
                 select(TRT01A, AGEGR1, SEX, npct) %>% 
                 pivot_wider(names_from = TRT01A, values_from = npct)
-                
+              
 
 # Display this data so we can check it
 adsl_age_cnt

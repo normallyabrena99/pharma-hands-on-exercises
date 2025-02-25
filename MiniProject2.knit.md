@@ -4506,6 +4506,23 @@ Repeat the steps above, but add an additional grouping variable to the calculati
 BigN <- adsl_eff %>%
   group_by(TRT01AN, TRT01A, AGEGR1N, AGEGR1) %>%
   count(name = "N")
+BigN
+```
+
+```
+## # A tibble: 9 × 5
+## # Groups:   TRT01AN, TRT01A, AGEGR1N, AGEGR1 [9]
+##   TRT01AN TRT01A               AGEGR1N AGEGR1     N
+##     <dbl> <chr>                  <dbl> <chr>  <int>
+## 1       0 Placebo                    1 <65       13
+## 2       0 Placebo                    2 65-80     40
+## 3       0 Placebo                    3 >80       26
+## 4      54 Xanomeline Low Dose        1 <65        7
+## 5      54 Xanomeline Low Dose        2 65-80     45
+## 6      54 Xanomeline Low Dose        3 >80       29
+## 7      81 Xanomeline High Dose       1 <65       10
+## 8      81 Xanomeline High Dose       2 65-80     50
+## 9      81 Xanomeline High Dose       3 >80       14
 ```
 
 
@@ -4513,6 +4530,32 @@ BigN <- adsl_eff %>%
 small_n <- adsl_eff %>%
   group_by(TRT01AN, TRT01A, AGEGR1N, AGEGR1, SEX) %>%
   count(name = "n")
+small_n
+```
+
+```
+## # A tibble: 18 × 6
+## # Groups:   TRT01AN, TRT01A, AGEGR1N, AGEGR1, SEX [18]
+##    TRT01AN TRT01A               AGEGR1N AGEGR1 SEX       n
+##      <dbl> <chr>                  <dbl> <chr>  <chr> <int>
+##  1       0 Placebo                    1 <65    F         8
+##  2       0 Placebo                    1 <65    M         5
+##  3       0 Placebo                    2 65-80  F        20
+##  4       0 Placebo                    2 65-80  M        20
+##  5       0 Placebo                    3 >80    F        18
+##  6       0 Placebo                    3 >80    M         8
+##  7      54 Xanomeline Low Dose        1 <65    F         4
+##  8      54 Xanomeline Low Dose        1 <65    M         3
+##  9      54 Xanomeline Low Dose        2 65-80  F        26
+## 10      54 Xanomeline Low Dose        2 65-80  M        19
+## 11      54 Xanomeline Low Dose        3 >80    F        17
+## 12      54 Xanomeline Low Dose        3 >80    M        12
+## 13      81 Xanomeline High Dose       1 <65    F         4
+## 14      81 Xanomeline High Dose       1 <65    M         6
+## 15      81 Xanomeline High Dose       2 65-80  F        26
+## 16      81 Xanomeline High Dose       2 65-80  M        24
+## 17      81 Xanomeline High Dose       3 >80    F         5
+## 18      81 Xanomeline High Dose       3 >80    M         9
 ```
 
 
@@ -4520,10 +4563,10 @@ small_n <- adsl_eff %>%
 # Paste commands above after the "<-" assignment, one per line
 adsl_age_cnt <- small_n %>%
                 left_join(BigN) %>%
-                mutate(perc = round(n/N*100, digits=1)) %>%
+                mutate(perc = round(n/N*100, digits=1)) %>% 
                 mutate(perc_char = format(perc, nsmall=1)) %>%
                 mutate(npct = paste(n, "(", perc_char, ")" ) ) %>% 
-                mutate(SEX = recode(SEX, "M" = "Male", "F" = "Female")) %>% 
+                mutate(SEX = recode(SEX, "M" = "Male", "F" = "Female")) %>%
                 ungroup() %>%
                 select(TRT01A, AGEGR1, SEX, npct) %>% 
                 pivot_wider(names_from = TRT01A, values_from = npct)

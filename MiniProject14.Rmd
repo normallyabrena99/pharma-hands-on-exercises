@@ -44,7 +44,7 @@ If you have typed the character sequence for a snippet and want to insert it imm
 
 
 ```{r common_snip}
-
+s
 ```
 
 ## Customizing Snippets

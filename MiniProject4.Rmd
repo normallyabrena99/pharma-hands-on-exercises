@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 4 - Creating summary table data"
-author: "Mike K Smith"
-date: "2/15/2023"
+author: "Norma Alejandra Abrena"
+date: "5/27/2025"
 output: html_document
 ---
 
@@ -227,5 +227,7 @@ dm_allcomb
 2.  Move N before Age- categories.
 
 3.  Add Ethnicity and Race.
+
+
 
 Save the .RMD file on your desktop and click on the "Knit" button at the top of the file to render an HTML version of this document.

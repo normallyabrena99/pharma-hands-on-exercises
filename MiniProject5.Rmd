@@ -338,22 +338,35 @@ Temp_plot
 Read in vital signs data from another study which uses the `VS` or `ADVS` dataset standards. What code needs to change when you produce Pulse Rate plot for the new dataset (compared to the Pulse Rate plot which uses data values to determine labels)?
 
 ```{r}
-VS <- import("https://github.com/phuse-org/phuse-scripts/raw/master/data/sdtm/updated_cdiscpilot/vs.xpt")
+vs_s <- import("https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdiscpilot01/advs.xpt")
 
-vs_pulse <- VS %>% 
-    filter(VSTESTCD== "PULSE") %>% 
-    filter(VISITNUM > 3)
-
-pulse_plot1 <- ggplot(data = (vs_pulse), mapping = aes(x=VSDY, y=VSSTRESN, group =  USUBJID)) +
-  geom_line()
-
-pulse_plot2 <- pulse_plot1 + 
-  labs(title = "Individual Heart Rate Plot of Participants",
-       subtitle = "Domain: Vital Signs",
-       x = "Observation Day",
-       y = "Pulse Rate (BEATS/MIN)",
-       caption = paste("Plot created on:",Sys.Date()))
-pulse_plot2
+ADVS2 <- vs_s %>% filter(!is.na(vs_s$AVAL))
+ 
+Pulse2 <- ADVS2  %>%
+  filter(PARAMN == 3) %>%
+  filter(VISITNUM > 3) %>%
+  mutate(StudyWeek = floor(ADY/7))
+ 
+Pulse2_plot <- plot4 %+%
+  Pulse2
+ 
+xLab <- quo_name(Pulse2_plot$mapping$x)
+yLab <- quo_name(Pulse2_plot$mapping$y)
+groupLab <- quo_name(Pulse2_plot$mapping$group)
+ 
+study <- uniqueVal(Pulse2_plot$data$STUDYID)
+measure <- uniqueVal(Pulse2_plot$data$PARAM)
+ 
+xLab <- ifelse(xLab == "ADY", "Analysis Relative Day", xLab)
+groupLab <- case_when(groupLab == "USUBJID" ~ "Subject", 
+                      groupLab == "TRTA" ~ "Treatment",
+                      TRUE ~ groupLab)
+ 
+Pulse2_plot + 
+  labs(title = glue::glue("Study {study}"),
+       subtitle = glue::glue("Plot of {measure} by {groupLab}"),
+       x = xLab,
+       y = glue::glue("{measure}"))
 ```
 
 

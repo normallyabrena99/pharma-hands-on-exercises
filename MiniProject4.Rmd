@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 4 - Creating summary table data"
 author: "Norma Alejandra Abrena"
-date: "5/27/2025"
+date: "6/20/2025"
 output: html_document
 ---
 
@@ -224,10 +224,125 @@ dm_allcomb
 
 1.  Reorder the age variables to be in the correct order (<65, 65-80, >80)
 
+```{r}
+dm_allcomb <- dm_allcomb %>%
+mutate(sortn = case_when(
+category == "<65" ~ 1,
+category == "65-80" ~ 2,
+category == ">80" ~ 3,
+category == "N" ~ 4,
+category == "Mean" ~ 5,
+category == "Median" ~ 6,
+category == "Std Dev" ~ 7,
+category == "Range(min,max)" ~ 8
+))
+ 
+dm_allcomb1 <- dm_allcomb[order(dm_allcomb$sortn), ]
+dm_allcomb1
+```
+
 2.  Move N before Age- categories.
+
+```{r}
+dm_allcomb2 <- bind_rows(dm_allcomb1[4,], dm_allcomb1[1:3,], dm_allcomb1[5:8,])  
+dm_allcomb2
+```
+
 
 3.  Add Ethnicity and Race.
 
+```{r}
+Ethnic_grp_N_cnt <- adsl_eff %>%
+  group_by(TRT01AN, TRT01A, ETHNIC) %>%
+  count(name = "ethnic_total")
+
+ethnic_n_cnt <- adsl_eff %>%
+  group_by(TRT01AN, TRT01A, SEX, ETHNIC) %>%
+  count(name = "ethnic_n")
+
+ethnic_mrg_cnt <- ethnic_n_cnt %>% 
+  left_join(Ethnic_grp_N_cnt, 
+            by = c("TRT01AN", "TRT01A", "ETHNIC"))
+
+ethnic_mrg_cnt2 <- ethnic_mrg_cnt %>% 
+  left_join(Big_N_cnt, 
+            by = c("TRT01AN", "TRT01A"))
+
+ethnic_mrg_cnt3 <- ethnic_mrg_cnt2 %>% 
+  left_join(small_n_cnt, 
+            by = c("TRT01A", "TRT01AN", "SEX"))
+
+ethnic_mrg_cnt3 <- ungroup(ethnic_mrg_cnt3)
+
+ethnic_data_new <- ethnic_mrg_cnt3 %>% 
+  mutate(perc_eth_tot = round((ethnic_total/N)*100, 1)) %>%                 
+  mutate(perc_eth = round((ethnic_n/n)*100,1))
+
+ethnic_pct <- ethnic_data_new %>%
+  mutate(perc_e_tchar = format(perc_eth_tot, nsmall = 1)) %>%
+  mutate(perc_e_char = format(perc_eth, nsmall = 1))
+
+ethnic_n_pct <- ethnic_pct %>%
+  mutate(npct = paste(ethnic_n, paste0("(", perc_e_char, ")"))) %>% 
+  select(ETHNIC, TRT01A, SEX, npct)
+
+Ethnic_trans <- pivot_wider(ethnic_n_pct, 
+                         names_from = c(TRT01A,SEX), 
+                         values_from = npct, 
+                         values_fill = "0",
+                         names_sep = "_")
+
+ethnic_cat <- rename(Ethnic_trans, category=ETHNIC)
+ethnic_cat %>%
+  arrange(category)
+
+race_grp_N_cnt <- adsl_eff %>%
+  group_by(TRT01AN, TRT01A, RACE) %>%
+  count(name = "race_total")
+
+race_n_cnt <- adsl_eff %>%
+  group_by(TRT01AN, TRT01A, SEX, RACE) %>%
+  count(name = "race_n")
+
+race_mrg_cnt <- race_n_cnt %>% 
+  left_join(race_grp_N_cnt, 
+            by = c("TRT01AN", "TRT01A", "RACE"))
+
+race_mrg_cnt2 <- race_mrg_cnt %>% 
+  left_join(Big_N_cnt, 
+            by = c("TRT01AN", "TRT01A"))
+
+race_mrg_cnt3 <- race_mrg_cnt2 %>% 
+  left_join(small_n_cnt, 
+            by = c("TRT01A", "TRT01AN", "SEX"))
+
+race_mrg_cnt3 <- ungroup(race_mrg_cnt3)
+
+race_data_new <- race_mrg_cnt3 %>% 
+  mutate(perc_eth_tot = round((race_total/N)*100, 1)) %>%                 
+  mutate(perc_eth = round((race_n/n)*100,1))
+
+race_pct <- race_data_new %>%
+  mutate(perc_e_tchar = format(perc_eth_tot, nsmall = 1)) %>%
+  mutate(perc_e_char = format(perc_eth, nsmall = 1))
+
+race_n_pct <- race_pct %>%
+  mutate(npct = paste(race_n, paste0("(", perc_e_char, ")"))) %>% 
+  select(RACE, TRT01A, SEX, npct)
+
+Race_trans <- pivot_wider(race_n_pct, 
+                         names_from = c(TRT01A,SEX), 
+                         values_from = npct, 
+                         values_fill = "0",
+                         names_sep = "_")
+
+race_cat <- rename(Race_trans, category=RACE)
+race_cat %>%
+  arrange(category)
+
+dm_allcomb3 <- bind_rows(dm_allcomb2, ethnic_cat, race_cat)  
+dm_allcomb3
+```
 
 
 Save the .RMD file on your desktop and click on the "Knit" button at the top of the file to render an HTML version of this document.

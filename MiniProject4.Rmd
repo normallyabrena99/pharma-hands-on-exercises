@@ -341,6 +341,7 @@ race_cat %>%
   arrange(category)
 
 dm_allcomb3 <- bind_rows(dm_allcomb2, ethnic_cat, race_cat)  
+
 dm_allcomb3
 ```
 

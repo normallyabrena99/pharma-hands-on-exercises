@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 14 - R snippets"
-author: "Leanne Vicente"
-date: "5/15/2023"
+author: "Norma Alejandra Abrena"
+date: "06/23/2025"
 output: html_document
 ---
 
@@ -16,7 +16,9 @@ To insert a snippet, in your R script or RMarkdown file, start typing in the nam
 
 
 ```{r function1}
-
+name <- function(variables) {
+  
+}
 ```
 
 If you select the snippet from the completion list, it will be inserted along with several text placeholders which you can fill in by typing and then pressing Tab to advance to the next placeholder:
@@ -44,7 +46,8 @@ If you have typed the character sequence for a snippet and want to insert it imm
 
 
 ```{r common_snip}
-s
+shinyapp
+
 ```
 
 ## Customizing Snippets

@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 6 - {ggplot2} extensions"
-author: "Mike K Smith"
-date: "2/21/2023"
+author: "Norma Alejandra Abrena"
+date: "06/23/2025"
 output: html_document
 ---
 
@@ -85,7 +85,7 @@ The predicate used in `gghighlight` here checks whether each subject has *any* v
 library(gghighlight)
 
 plot1c <- plot1b +
-  gghighlight::gghighlight(any(LBNRIND = "")) 
+  gghighlight::gghighlight(any(LBNRIND == "HIGH" | LBNRIND == "LOW")) 
 
 plot1c
 ```
@@ -95,7 +95,7 @@ In order to use facetting with `gghighlight` you need to set the argument `calcu
 ```{r}
 plot1d <- plot1b  +
   facet_wrap( ~ TRTP) + 
-  gghighlight::gghighlight(any(LBNRIND = ""), 
+  gghighlight::gghighlight(any(LBNRIND == "HIGH" | LBNRIND == "LOW"), 
                            calculate_per_facet = TRUE) 
 plot1d
 ```
@@ -118,7 +118,7 @@ Now let's add data on top of the boxplots. We can do this quite easily using `ge
 ```{r}
 ALT2 %>%
   filter(WEEK %in% c(0, 5, 10, 15, 20, 25, 30)) %>%
-  ggplot( ) +
+  ggplot( mapping = aes(x = as.factor(WEEK), y = LBSTRESN) ) +
   geom_boxplot( ) +
   geom_point( )
 ```
@@ -127,9 +127,9 @@ It might be more useful to spread out the points a little so that we can see ind
 
 ```{r}
 plot2b <- ALT2 %>%
-  filter( ) %>%
-  ggplot(mapping = aes(x = , y = )) +
-  geom_boxplot(  ) +
+  filter(WEEK %in% c(0, 5, 10, 15, 20, 25, 30) ) %>%
+  ggplot(mapping = aes(x = as.factor(WEEK), y = LBSTRESN) ) +
+  geom_boxplot( outlier.shape=NA ) +
   geom_jitter(alpha = 0.2, width = 0.1)
 
 plot2b
@@ -180,9 +180,8 @@ Bar charts can be used to count the number of observations in the data. Let's us
 Use the "Data visualization with ggplot2" Cheat Sheet (from the Help menu in RStudio) to see what aesthetics can be specified for `geom_bar` bar chart to show how many observations are in each category of `LBNRIND` across `WEEK`.
 
 ```{r}
-ALT2 %>%
-  ggplot() +
-  geom_bar(mapping = aes( ))
+ggplot(ALT2, aes(x = WEEK, fill = LBNRIND)) +
+  geom_bar(position = "stack")
 ```
 
 Most individuals have Lab measurements on weeks 2, 4, 6, 8, 16, 24, 26. Let's filter the data to show JUST those weeks.
@@ -225,15 +224,20 @@ As we did in the last mini project, we can now take plots `plot1b` and `plot2b` 
 
 ```{r}
 plot1e <- plot1b +
-  labs(x =  ,
-       y =   )
+  labs(x = "Analysis Relative Day" ,
+       y =  "Numeric lab results in std units" )
 
 plot2c <- plot2b +
-  labs(x =  , y =   )
+  labs(x = "Week" , y = "Numeric lab results in std units"  )
 
 plot3c <- plot3b +
-  labs(x =  ,
-       y =  )
+  labs(x = "Week" ,
+       y = "Count" )
+
+
+plot1e
+plot2c
+plot3c
 ```
 
 ## 7. Using `{patchwork}`
@@ -288,6 +292,21 @@ Using what you've learned in this Mini Project 6, please try to create a graph s
 
 ```{r, echo=FALSE}
 knitr::include_graphics(path = "img/MiniProject6_challenge.png")
+ALT3 <- ALT2 %>% 
+  filter(WEEK %in% c(2,4,6,8,16,24,26)) %>% 
+  filter(LBNRIND %in% c("HIGH", "LOW"))
+
+plot4 <- 
+  ALT2 %>% 
+  filter(WEEK %in% c(2,4,6,8,16,24,26)) %>% 
+  ggplot(mapping = aes(x = LBSTRESN, y = as.factor(WEEK))) +
+  coord_cartesian(xlim=c(0, 125)) +
+  stat_dotsinterval(slab_alpha = 0) +
+  geom_point(data = ALT3, aes(color = "red")) +
+  labs(x = "Alanine Aminotransferase U/L",
+       y = "Week")
+
+plot4
 ```
 
 ```{r}

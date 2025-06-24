@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 7 - Getting started writing functions"
-author: "Mike K Smith"
-date: "3/2/2023"
+author: "Norma Alejandra Abrena"
+date: "6/24/2025"
 output: html_document
 ---
 
@@ -20,7 +20,7 @@ A function is a little like a SAS Macro. When you first write the function you w
 To illustrate this we will return an example from MiniProject 2 where we calculated the number of observations within a dataset and calculated numbers and proportions within a category. Recall that section
 
 ```{r}
-adsl_saf <- import("https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt") %>%
+adsl_saf <- read_xpt("https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt") %>%
     filter(SAFFL == "Y")
   
   Big_N_cnt <- adsl_saf %>%
@@ -151,7 +151,7 @@ Use the RStudio IDE `fun` snippet to create a function called "adsl_counts" base
 ```{r}
 
 adsl_counts <- function(dataFile){
- adsl_saf <- read_xpt(  ) %>%
+ adsl_saf <- read_xpt( dataFile ) %>%
     filter(SAFFL == "Y")
   
   Big_N_cnt <-  adsl_saf %>%
@@ -180,6 +180,7 @@ adsl_counts <- function(dataFile){
     pivot_wider(names_from = TRT01A, values_from = npct) 
   return(adsl_mrg_cnt)
 }
+
 ```
 
 Running the finished function code above creates an R object of type function. You can see it in your Environment. Click on the function name or the "Script" icon to the right to view your function code.
@@ -189,9 +190,43 @@ Running the finished function code above creates an R object of type function. Y
 Now test your code by creating a character string of the path to a CDISC `adsl` dataset and running your function. Note that you don't need to put the full path into the function call. Below we've created an object containing that path, then we're passing this into the function.
 
 ```{r}
+adsl_counts <- function(adsl_FilePath) {
+  adsl_saf <- read_xpt( adsl_FilePath) %>%
+    filter(SAFFL == "Y")
+  
+  Big_N_cnt <-  adsl_saf   %>%
+    group_by( TRT01AN, TRT01A  ) %>%
+    count(name = "N")
+  Big_N_cnt
+  
+  small_n_cnt <-  adsl_saf  %>%
+    group_by( TRT01AN, TRT01A,  SEX ) %>%
+    count(name = "n")
+  small_n_cnt
+  
+  adsl_mrg_cnt <- small_n_cnt %>%
+    left_join(Big_N_cnt, by = c("TRT01A", "TRT01AN")) %>%
+    mutate(perc = round((n/N)*100, digits=1)) %>%
+    mutate(perc_char = format(perc, nsmall=1)) %>%
+    mutate(npct = paste(n, 
+                        paste0( "(", perc_char, ")" ) 
+                        ) 
+           ) %>%
+    mutate(SEX = recode(SEX, 
+                        "M" = "Male",
+                        "F" = "Female")) %>%
+    ungroup() %>%
+    select(TRT01A, SEX, npct) %>%
+    pivot_wider(names_from = TRT01A, values_from = npct)
+  
+  adsl_mrg_cnt
+}
+
+
 inFile <- "https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adsl.xpt"
 
-adsl_counts(inFile)
+table1 <- adsl_counts(inFile)
+table1
 ```
 
 ## 5. Defensive programming
@@ -224,7 +259,7 @@ My recommendation is to write the function, check that it works, THEN go back th
 
 ```{r}
 adsl_counts <- function(dataFile){
-    adsl_saf <- read_xpt(  ) %>%
+    adsl_saf <- read_xpt( dataFile ) %>%
     filter(SAFFL == "Y")
   
   Big_N_cnt <- adsl_saf %>%
@@ -268,8 +303,8 @@ Amend the function code below to instead calculate based on an input dataset, li
 
 ```{r}
 adsl_counts <- function(adsl_FilePath) {
-  adsl_saf <- read_xpt(   ) %>%
-    filter(SAFFL == "Y")
+  #adsl_saf <- read_xpt(data_file = adsl_FilePath) %>%
+    #filter(SAFFL == "Y")
   
   Big_N_cnt <-  adsl_saf   %>%
     group_by( TRT01AN, TRT01A  ) %>%
@@ -338,3 +373,56 @@ In the code above we are allowing the user to pass the `digits` argument through
 ## Challenge
 
 Convert the code you wrote in the Mini Project 6 challenge into a function that takes an input `adlb` dataset and produces the graph. For an additional challenge, allow the user to specify the axes labels.
+
+```{r}
+# Load required libraries
+library(ggdist)
+library(cowplot)
+
+# Define graph function
+graph <- function(adlb_FilePath, x_label, y_label){
+  
+  # Read the XPT file and filter to ALT Parameter
+  ALT <- read_xpt(adlb_FilePath) %>% 
+    filter(PARAMCD == "ALT")
+  
+  # Further filter ALT data for active phase and calculate week number
+  ALT2 <- ALT %>% 
+    filter(VISITNUM > 3) %>% 
+    mutate(WEEK = floor(ADY/7))
+  
+  # Create a treatment factor ordered by TRTAN
+  TREATfac <- ALT2 %>% 
+    select(TRTA, TRTAN) %>% 
+    unique() %>% 
+    arrange(TRTAN) %>% 
+    mutate(TREATMENT = factor(TRTA, ordered = TRUE))
+  
+  # Add treatment text as a factor with levels ordered by TRTA
+  ALT2 <- ALT2 %>% 
+    mutate(TREATTXT = factor(TRTP, levels = TREATfac$TRTA))
+  
+  # Filter for specific weeks and abnormal lab results (HIGH or LOW)
+  ALT3 <- ALT2 %>% 
+  filter(WEEK %in% c(2,4,6,8,16,24,26)) %>% 
+  filter(LBNRIND %in% c("HIGH", "LOW"))
+  
+  # Create the plot
+
+  plot4 <- ALT2 %>% 
+    filter(WEEK %in% c(2,4,6,8,16,24,26)) %>% 
+    ggplot(mapping = aes(x = LBSTRESN, y = as.factor(WEEK))) +
+    coord_cartesian(xlim=c(0, 125)) +
+    stat_dotsinterval(slab_alpha = 0) +
+    geom_point(data = ALT3, aes(color = "red")) +
+    labs(x = x_label,
+         y = y_label)
+  
+  ggdraw(plot4) +
+    draw_label("DRAFT", color = "grey", alpha = 0.3, size = 75, angle = 45)
+}
+
+# Call the function with dataset and axis labels
+graph("https://github.com/phuse-org/phuse-scripts/raw/master/data/adam/cdisc/adlbc.xpt", "Alanine Aminotransferase U/L", "Week")
+```
+

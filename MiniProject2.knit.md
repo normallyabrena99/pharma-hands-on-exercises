@@ -1,7 +1,7 @@
 ---
 title: "Mini-project 2 - Summarising continuous and categorical data"
 author: "Norma Alejandra Abrena"
-date: "02/20/2025"
+date: "02/25/2025"
 output: html_document 
 ---
 
